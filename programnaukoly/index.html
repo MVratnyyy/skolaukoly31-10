@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Správa domácích úkolů</title>
+    <style>
+        /* Styly pro jednoduchý vzhled */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+
+        #loginForm {
+            margin: 100px auto;
+            padding: 20px;
+            width: 300px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+        }
+
+        #taskPage {
+            display: none;
+        }
+
+        #taskList {
+            text-align: left;
+            margin: 20px auto;
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+        }
+
+        #taskForm {
+            display: none;
+            text-align: left;
+            margin: 20px auto;
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        select,
+        textarea,
+        input[type="date"] {
+            width: 100%;
+            padding: 5px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+<h1>Přihlášení</h1>
+<div id="loginForm">
+    <form id="userLoginForm">
+        <label for="username">Uživatelské jméno:</label>
+        <input type="text" id="username" name="username" required>
+        <br><br>
+        <label for="password">Heslo:</label>
+        <input type="password" id="password" name="password" required>
+        <br><br>
+        <button type="button" id="loginButton">Přihlásit</button>
+    </form>
+</div>
+<div id="taskPage">
+    <h2>Vaše úkoly</h2>
+    <button type="button" id="addTaskButton">Přidat úkol</button>
+    <div id="taskList">
+        <table>
+            <tr>
+                <th>Předmět</th>
+                <th>Popis úkolu</th>
+                <th>Datum odevzdání</th>
+            </tr>
+        </table>
+    </div>
+</div>
+<div id="taskForm">
+    <h2>Přidat úkol</h2>
+    <form id="addTaskForm">
+        <label for="subject">Předmět:</label>
+        <select id="subject" name="subject">
+            <option value="Matematika">Matematika</option>
+            <option value="Čeština">Čeština</option>
+            <option value="Dějepis">Dějepis</option>
+            <!-- Přidej další předměty podle potřeby -->
+        </select>
+        <br><br>
+        <label for="description">Popis úkolu:</label>
+        <textarea id="description" name="description" required></textarea>
+        <br><br>
+        <label for="dueDate">Datum odevzdání:</label>
+        <input type="date" id="dueDate" name="dueDate" required>
+        <br><br>
+        <button type="button" id="submitTaskButton">Přidat úkol</button>
+        <button type="button" id="cancelTaskButton">Zrušit</button>
+    </form>
+</div>
+<script>
+    // Funkce pro uložení uživatelů do local storage
+    function saveUsersToLocalStorage(users) {
+        localStorage.setItem("users", JSON.stringify(users));
+    }
+
+    // Funkce pro získání uživatelů z local storage
+    function getUsersFromLocalStorage() {
+        const usersJson = localStorage.getItem("users");
+        return usersJson ? JSON.parse(usersJson) : [];
+    }
+
+    const saveTasksToLocalStorage = (tasks) => {
+        //save for every user separately
+        localStorage.setItem("tasks" + document.getElementById("username").value, JSON.stringify(tasks));
+    }
+
+    const getTasksFromLocalStorage = () => {
+        const tasksJson = localStorage.getItem("tasks" + document.getElementById("username").value);
+        return tasksJson ? JSON.parse(tasksJson) : [];
+    }
+
+    // Uživatelé uložení v local storage
+    let users = getUsersFromLocalStorage();
+
+    // Testovací uživatelé
+    const testUsers = [{
+        username: "test1",
+        password: "test1password"
+    }, {
+        username: "test2",
+        password: "test2password"
+    }, {
+        username: "test3",
+        password: "test3password"
+    }];
+
+    // Přidání testovacích uživatelů, pokud nejsou v local storage
+    if (users.length === 0) {
+        users = testUsers;
+        saveUsersToLocalStorage(users);
+    }
+
+    // Funkce pro ověření přihlášení a zobrazení stránky s úkoly
+    function loginUser() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        for (const user of users) {
+            if (user.username === username && user.password === password) {
+                // Přihlášení bylo úspěšné, zobrazíme stránku s úkoly
+                document.getElementById("loginForm").style.display = "none";
+                document.getElementById("taskPage").style.display = "block";
+                loadTasks();
+                return;
+            }
+        }
+        alert("Nesprávné uživatelské jméno nebo heslo.");
+    }
+
+    // Přidání akce pro tlačítko pro přihlášení
+    const loginButton = document.getElementById("loginButton");
+    loginButton.addEventListener("click", loginUser);
+
+    // Funkce pro zobrazení formuláře pro přidání úkolu
+    function showTaskForm() {
+        document.getElementById("taskForm").style.display = "block";
+    }
+
+    // Funkce pro zrušení formuláře pro přidání úkolu
+    function cancelTaskForm() {
+        document.getElementById("taskForm").style.display = "none";
+    }
+
+    // Přidání akce pro tlačítka na zobrazení a zrušení formuláře pro přidání úkolu
+    const addTaskButton = document.getElementById("addTaskButton");
+    addTaskButton.addEventListener("click", showTaskForm);
+
+    const cancelTaskButton = document.getElementById("cancelTaskButton");
+    cancelTaskButton.addEventListener("click", cancelTaskForm);
+
+    // Funkce pro přidání úkolu do tabulky
+    function addTaskToTable() {
+        const subject = document.getElementById("subject").value;
+        const description = document.getElementById("description").value;
+        const dueDate = document.getElementById("dueDate").value;
+        const table = document.querySelector("table");
+        const row = table.insertRow(table.rows.length);
+        const cell1 = row.insertCell(0);
+        const cell2 = row.insertCell(1);
+        const cell3 = row.insertCell(2);
+        cell1.innerHTML = subject;
+        cell2.innerHTML = description;
+        cell3.innerHTML = dueDate;
+        document.getElementById("taskForm").style.display = "none";
+        saveTasksToLocalStorage(getTasksFromLocalStorage().concat({
+            subject,
+            description,
+            dueDate
+        }));
+    }
+
+    function loadTasks() {
+        const tasks = getTasksFromLocalStorage();
+        const table = document.querySelector("table");
+        for (const task of tasks) {
+            const row = table.insertRow(table.rows.length);
+            const cell1 = row.insertCell(0);
+            const cell2 = row.insertCell(1);
+            const cell3 = row.insertCell(2);
+            cell1.innerHTML = task.subject;
+            cell2.innerHTML = task.description;
+            cell3.innerHTML = task.dueDate;
+        }
+    }
+
+    const submitTaskButton = document.getElementById("submitTaskButton");
+    submitTaskButton.addEventListener("click", addTaskToTable);
+</script>
+</body>
+</html>
