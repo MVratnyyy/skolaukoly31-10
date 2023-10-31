@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* Styly pro vzhled aplikace */
+        /* Můžete přidat další styly podle potřeby */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+        .shopping-list, .user-list {
+            background-color: #fff;
+            padding: 20px;
+            margin: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        button {
+            padding: 5px 10px;
+            margin: 5px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .completed {
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+<body>
+    <h1>Nákupní seznam</h1>
+    <div id="app">
+        <div class="shopping-list">
+            <h2>Název seznamu:</h2>
+            <input id="list-name" type="text">
+            <h2>Položky:</h2>
+            <ul id="item-list">
+                <!-- Položky seznamu budou vytvářeny dynamicky pomocí JavaScriptu -->
+            </ul>
+            <button id="add-item">Přidat položku</button>
+            <button id="archive-list">Archivovat</button>
+            <button id="create-list">Vytvořit seznam</button>
+            <button id="complete-items">Označit jako hotové</button>
+            <button id="delete-list">Smazat list</button>
+        </div>
+        <div class="user-list">
+            <h2>Uživatelé s přístupem:</h2>
+            <ul id="user-list">
+                <!-- Seznam uživatelů bude vytvářen dynamicky pomocí JavaScriptu -->
+            </ul>
+            <input id="add-user" type="text" placeholder="Přidat uživatele">
+            <button id="add-user-button">Přidat uživatele</button>
+        </div>
+    </div>
+    <script>
+        // JavaScript kód
+        const listNameInput = document.getElementById("list-name");
+        const itemInput = document.getElementById("add-item");
+        const itemList = document.getElementById("item-list");
+        const archiveButton = document.getElementById("archive-list");
+        const createListButton = document.getElementById("create-list");
+        const completeItemsButton = document.getElementById("complete-items");
+        const deleteListButton = document.getElementById("delete-list");
+        const userAddInput = document.getElementById("add-user");
+        const userUl = document.getElementById("user-list");
+        const addUserButton = document.getElementById("add-user-button");
+
+        // Přidání položky do seznamu
+        itemInput.addEventListener("click", addItem);
+
+        function addItem() {
+            const itemName = prompt("Zadejte název položky:");
+            if (itemName) {
+                const li = document.createElement("li");
+                const itemText = document.createElement("span");
+                itemText.textContent = itemName;
+                const itemQuantity = document.createElement("input");
+                itemQuantity.type = "number";
+                itemQuantity.value = 1;
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "Odebrat";
+                li.appendChild(itemText);
+                li.appendChild(itemQuantity);
+                li.appendChild(deleteButton);
+                itemList.appendChild(li);
+                deleteButton.addEventListener("click", () => {
+                    itemList.removeChild(li);
+                });
+            }
+        }
+
+        // Archivace seznamu
+        archiveButton.addEventListener("click", () => {
+            const archivedList = document.createElement("ul");
+            archivedList.id = "archived-list";
+            const items = itemList.querySelectorAll("li");
+            items.forEach((item) => {
+                if (item.classList.contains("completed")) {
+                    archivedList.appendChild(item.cloneNode(true));
+                }
+            });
+            itemList.innerHTML = "";
+            itemList.appendChild(archivedList);
+        });
+
+        // Vytvoření seznamu
+        createListButton.addEventListener("click", () => {
+            const listName = listNameInput.value;
+            if (listName) {
+                const newList = document.createElement("ul");
+                newList.id = "item-list";
+                itemList.replaceWith(newList);
+            }
+        });
+
+        // Označení položek jako hotové
+        completeItemsButton.addEventListener("click", () => {
+            const items = itemList.querySelectorAll("li");
+            items.forEach((item) => {
+                item.classList.toggle("completed");
+            });
+        });
+
+        // Smazání seznamu
+        deleteListButton.addEventListener("click", () => {
+            itemList.innerHTML = "";
+        });
+
+        // Přidání uživatele
+        addUserButton.addEventListener("click", () => {
+            const userName = userAddInput.value;
+            if (userName) {
+                const li = document.createElement("li");
+                li.textContent = userName;
+                userUl.appendChild(li);
+                userAddInput.value = "";
+            }
+        });
+    </script>
+</body>
+</html>
